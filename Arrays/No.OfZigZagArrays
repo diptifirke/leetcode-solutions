@@ -1,0 +1,75 @@
+class Solution {
+    static final int MOD = 1_000_000_007;
+
+    public int zigZagArrays(int n, int l, int r) {
+        int m = r - l + 1;
+        int sz = 2 * m;
+
+        long[][] trans = new long[sz][sz];
+        for (int v = 0; v < m; v++) {
+            for (int w = 0; w < m; w++) {
+                if (v == w) continue;
+                if (w > v) {
+                    trans[w + m][v] = 1;
+                } else {
+                    trans[w][v + m] = 1;
+                }
+            }
+        }
+
+        long[] init = new long[sz];
+        for (int a = 0; a < m; a++) {
+            for (int b = 0; b < m; b++) {
+                if (a == b) continue;
+                if (b > a) {
+                    init[b + m]++;
+                } else {
+                    init[b]++;
+                }
+            }
+        }
+
+        long[][] result = matpow(trans, n - 2, sz);
+        long[] finalVec = matvec(result, init, sz);
+
+        long ans = 0;
+        for (long x : finalVec) {
+            ans = (ans + x) % MOD;
+        }
+        return (int) ans;
+    }
+
+    private long[][] matpow(long[][] mat, long p, int sz) {
+        long[][] res = new long[sz][sz];
+        for (int i = 0; i < sz; i++) res[i][i] = 1;
+        while (p > 0) {
+            if ((p & 1) == 1) res = matmul(res, mat, sz);
+            mat = matmul(mat, mat, sz);
+            p >>= 1;
+        }
+        return res;
+    }
+
+    private long[][] matmul(long[][] A, long[][] B, int sz) {
+        long[][] C = new long[sz][sz];
+        for (int i = 0; i < sz; i++) {
+            for (int k = 0; k < sz; k++) {
+                if (A[i][k] == 0) continue;
+                for (int j = 0; j < sz; j++) {
+                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+                }
+            }
+        }
+        return C;
+    }
+
+    private long[] matvec(long[][] M, long[] v, int sz) {
+        long[] res = new long[sz];
+        for (int i = 0; i < sz; i++) {
+            for (int j = 0; j < sz; j++) {
+                res[i] = (res[i] + M[i][j] * v[j]) % MOD;
+            }
+        }
+        return res;
+    }
+}
